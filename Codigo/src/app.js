@@ -130,6 +130,62 @@ app.get('/paciente/:id', (req, res) => {
   res.json(paciente);
 });
 
+// update
+app.put('/paciente/:id', (req, res) => {
+  const pacienteId = parseInt(req.params.id);
+
+  const todosPacientes = [
+    ...pacientes.filaEspera,
+    ...pacientes.emAtendimento,
+    ...pacientes.historico
+  ];
+
+  const paciente = todosPacientes.find(p => p.id === pacienteId);
+
+  if (!paciente) {
+    return res.status(404).json({ erro: 'Paciente não encontrado' });
+  }
+
+  const { nome, idade, sintomas, prioridade } = req.body;
+
+  if (nome) paciente.nome = nome;
+  if (idade) paciente.idade = idade;
+  if (sintomas) paciente.sintomas = sintomas;
+  if (prioridade && Object.values(Prioridade).includes(prioridade)) {
+    paciente.prioridade = prioridade;
+  }
+
+  res.json({ mensagem: 'Paciente atualizado com sucesso', paciente });
+});
+
+
+//delete
+app.delete('/paciente/:id', (req, res) => {
+  const pacienteId = parseInt(req.params.id);
+
+  const removerPaciente = (lista) => {
+    const index = lista.findIndex(p => p.id === pacienteId);
+    if (index !== -1) {
+      const pacienteRemovido = lista[index];
+      lista.splice(index, 1);
+      return pacienteRemovido;
+    }
+    return null;
+  };
+
+  const removidoDaFila = removerPaciente(pacientes.filaEspera);
+  const removidoEmAtendimento = removerPaciente(pacientes.emAtendimento);
+  const removidoDoHistorico = removerPaciente(pacientes.historico);
+
+  const pacienteRemovido = removidoDaFila || removidoEmAtendimento || removidoDoHistorico;
+
+  if (!pacienteRemovido) {
+    return res.status(404).json({ erro: 'Paciente não encontrado' });
+  }
+
+  res.json({ mensagem: 'Paciente removido com sucesso', paciente: pacienteRemovido });
+});
+
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
