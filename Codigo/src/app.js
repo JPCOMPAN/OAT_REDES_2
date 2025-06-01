@@ -23,7 +23,7 @@ function getDataHoraAtual() {
   return now.toLocaleString('pt-BR');
 }
 
-app.post('/pacientes', (req, res) => {
+app.post('/adicionar-pacientes', (req, res) => {
   try {
     const pacientesRecebidos = Array.isArray(req.body) ? req.body : [req.body];
 
@@ -139,7 +139,7 @@ app.get('/paciente/:id', (req, res) => {
 });
 
 // update
-app.put('/paciente/:id', (req, res) => {
+app.put('/atualizar-paciente/:id', (req, res) => {
   const pacienteId = parseInt(req.params.id);
 
   const todosPacientes = [
@@ -168,7 +168,7 @@ app.put('/paciente/:id', (req, res) => {
 
 
 //delete
-app.delete('/paciente/:id', (req, res) => {
+app.delete('/deletar-paciente/:id', (req, res) => {
   const pacienteId = parseInt(req.params.id);
 
   const removerPaciente = (lista) => {
