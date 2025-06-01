@@ -25,34 +25,42 @@ function getDataHoraAtual() {
 
 app.post('/pacientes', (req, res) => {
   try {
-    if (!req.body.nome || !req.body.idade) {
-      throw new Error('Nome e idade são obrigatórios!');
+    const pacientesRecebidos = Array.isArray(req.body) ? req.body : [req.body];
+
+    const pacientesAdicionados = [];
+
+    for (const paciente of pacientesRecebidos) {
+      if (!paciente.nome || !paciente.idade) {
+        throw new Error('Todos os pacientes devem ter nome e idade!');
+      }
+
+      const novoPaciente = {
+        id: idCounter++,
+        nome: paciente.nome,
+        idade: paciente.idade,
+        sintomas: paciente.sintomas || [],
+        prioridade: Object.values(Prioridade).includes(paciente.prioridade)
+          ? paciente.prioridade
+          : Prioridade.PADRAO,
+        dataEntrada: getDataHoraAtual(),
+        status: 'aguardando'
+      };
+
+      if (novoPaciente.prioridade === Prioridade.EMERGENCIA) {
+        pacientes.filaEspera.unshift(novoPaciente);
+      } else {
+        pacientes.filaEspera.push(novoPaciente);
+      }
+
+      pacientesAdicionados.push(novoPaciente);
     }
 
-    const novoPaciente = {
-      id: idCounter++,
-      nome: req.body.nome,
-      idade: req.body.idade,
-      sintomas: req.body.sintomas || 'Não descritos',
-      prioridade: Object.values(Prioridade).includes(req.body.prioridade) 
-        ? req.body.prioridade 
-        : Prioridade.PADRAO,
-      dataEntrada: getDataHoraAtual(),
-      status: 'aguardando'
-    };
-
-
-    if (novoPaciente.prioridade === Prioridade.EMERGENCIA) {
-      pacientes.filaEspera.unshift(novoPaciente); 
-    } else {
-      pacientes.filaEspera.push(novoPaciente); 
-    }
-
-    console.log(`Paciente ${novoPaciente.nome} adicionado à fila`);
-    res.status(201).json(novoPaciente);
+    res.status(201).json({
+      mensagem: `${pacientesAdicionados.length} paciente(s) adicionado(s)`,
+      pacientes: pacientesAdicionados
+    });
 
   } catch (err) {
-    console.error('Erro ao adicionar paciente:', err.message);
     res.status(400).json({ erro: err.message });
   }
 });
