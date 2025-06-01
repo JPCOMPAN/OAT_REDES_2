@@ -65,7 +65,7 @@ app.post('/adicionar-pacientes', (req, res) => {
   }
 });
 
-app.get('/fila', (req, res) => {
+app.get('/organizar-fila', (req, res) => {
   
   const filaOrdenada = [...pacientes.filaEspera].sort((a, b) => {
     const ordemPrioridade = [
@@ -119,7 +119,7 @@ app.post('/finalizar-atendimento/:id', (req, res) => {
 });
 
 
-app.get('/paciente/:id', (req, res) => {
+app.get('/procurar-paciente/:id', (req, res) => {
   const pacienteId = parseInt(req.params.id);
 
 
